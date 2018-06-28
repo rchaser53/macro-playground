@@ -1,0 +1,4 @@
+export RUSTFLAGS="-Z save-analysis"
+
+target/debug/deps/save-analysis
+target/rls/debug/deps/save-analysis
