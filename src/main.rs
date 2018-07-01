@@ -4,6 +4,7 @@ mod macro_test;
 use std::rc::{Rc, Weak};
 use std::error::Error;
 
+#[derive(Debug)]
 struct Part {
   id: usize,
   parent: Weak<Part>,
@@ -34,8 +35,10 @@ impl Part {
 }
 
 fn main() {
-  
+  let child = Part::new().unwrap();
+  let parent = child.parent.upgrade();
 
+  println!("{:?}", child);
     // println!("{}", i32 == i32);
 }
 
