@@ -12,25 +12,38 @@ struct Part {
 }
 
 impl Part {
-  fn new() -> Part {
+  fn new(id: usize) -> Part {
     Part {
-      id: 1,
+      id: id,
       parent: Weak::new(),
       children: Vec::new(),
     }
   }
 
-  fn add_child(mut self, mut part: Part) {
-    self.children.push(Rc::new(part));
-    let rc_parent = &Rc::new(self);
-    let weak_parent = Rc::downgrade(&rc_parent);
-    part.parent = weak_parent;    
+  fn add_child(&mut self, part: &mut Part, weak_parent: Weak<Part>) {
+    self.children.push(Rc::new(part.clone()));
+    // let rc_parent = Rc::new(self.clone());
+    // let weak_parent = Rc::downgrade(&rc_parent);
+    // println!("{:?}", weak_parent.upgrade());
+
+    part.parent = weak_parent;
+    println!("in {:?} id: {}", part.parent.upgrade(), part.id);
   }
 }
 
 fn main() {
-  let parent = Part::new();
-  parent.add_child(Part::new());
+  let mut parent = Part::new(1);
+  let mut child = Part::new(2);
+  let rc_parent = Rc::new(parent.clone());
+  let weak_parent = Rc::downgrade(&rc_parent);
+
+  &parent.add_child(&mut child, weak_parent);
+
+  // println!("{:?}", weak_parent.upgrade());
+  // println!("{:?}", parent.children[0].parent.upgrade());
+  println!("{:?}", child.parent.upgrade());
+  // println!("{:?}", child);
+  // println!("{:?}", parent.children[0].id);
 }
 
 /* succeed but it's completely difference what i want */
