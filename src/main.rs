@@ -20,30 +20,23 @@ impl Part {
     }
   }
 
-  fn add_child(&mut self, part: &mut Part, weak_parent: Weak<Part>) {
-    self.children.push(Rc::new(part.clone()));
-    // let rc_parent = Rc::new(self.clone());
-    // let weak_parent = Rc::downgrade(&rc_parent);
-    // println!("{:?}", weak_parent.upgrade());
-
-    part.parent = weak_parent;
-    println!("in {:?} id: {}", part.parent.upgrade(), part.id);
+  fn add_child(&mut self, weak_parent: Weak<Part>) {
+    let child = Part{
+      id: 2,
+      parent: weak_parent,
+      children: Vec::new(),
+    };
+    self.children.push(Rc::new(child.clone()));
   }
 }
 
 fn main() {
   let mut parent = Part::new(1);
-  let mut child = Part::new(2);
   let rc_parent = Rc::new(parent.clone());
   let weak_parent = Rc::downgrade(&rc_parent);
 
-  &parent.add_child(&mut child, weak_parent);
-
-  // println!("{:?}", weak_parent.upgrade());
-  // println!("{:?}", parent.children[0].parent.upgrade());
-  println!("{:?}", child.parent.upgrade());
-  // println!("{:?}", child);
-  // println!("{:?}", parent.children[0].id);
+  &parent.add_child(weak_parent);
+  println!("{:?}", parent.children[0].parent.upgrade());
 }
 
 /* succeed but it's completely difference what i want */
