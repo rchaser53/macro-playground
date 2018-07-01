@@ -4,7 +4,7 @@ mod macro_test;
 use std::rc::{Rc, Weak};
 use std::error::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Part {
   id: usize,
   parent: Weak<Part>,
@@ -12,44 +12,48 @@ struct Part {
 }
 
 impl Part {
-  // fn new() -> Result<Rc<Part>, Error> {
   fn new() -> Result<Part, Rc<Part>> {
-
-    let mut parent = Part {
+    let parent = Part {
       id: 1,
       parent: Weak::new(),
       children: Vec::new(),
     };
+    let rc_parent = Rc::new(parent);
+    let mut parent_copy = rc_parent.clone();
 
-    let mut child = Part {
+    let child = Part {
       id: 2,
-      parent: Weak::new(),
+      parent: Rc::downgrade(&rc_parent),
       children: Vec::new(),
     };
     let rc_child = Rc::new(child);
-    parent.children.push(rc_child.clone());
-    child.parent = Rc::downgrade(&Rc::new(parent));
-
-    Rc::try_unwrap(rc_child)
+    Rc::make_mut(&mut parent_copy).children.push(rc_child.clone());
+    
+    Rc::try_unwrap(parent_copy)
+    // die parent so will get None
   }
 }
 
 fn main() {
-  let child = Part::new().unwrap();
-  let parent = child.parent.upgrade();
-
-  println!("{:?}", child);
-    // println!("{}", i32 == i32);
+  let parent = Part::new().unwrap();
+  println!("{:?}", parent.children[0].parent.upgrade());
 }
 
+/* succeed but it's completely difference what i want */
+// let parent = Part {
+//   id: 1,
+//   parent: Weak::new(),
+//   children: Vec::new(),
+// };
+// let rc_parent = Rc::new(parent);
+// let mut parent_copy = rc_parent.clone();
 
+// let child = Part {
+//   id: 2,
+//   parent: Rc::downgrade(&rc_parent),
+//   children: Vec::new(),
+// };
+// let rc_child = Rc::new(child);
+// Rc::make_mut(&mut parent_copy).children.push(rc_child.clone());
 
-    // .get().unwrap()
-    // child
-      // let mut rc_child = parent.children.get_mut(0).unwrap();
-      // let mut child = Rc::get_mut(rc_child).unwrap();
-      // child.parent = Rc::downgrade(&Rc::new(parent));
-    
-    // child.parent = Rc::downgrade(&Rc::new(parent));
-    // parent: Rc::downgrade(&Rc::new(parent)),
-    // parent
+// println!("{:?}", rc_child.parent.upgrade());
